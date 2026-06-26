@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aura.app.ui.main.MainScreen
 import com.aura.app.ui.permissions.PermissionRationaleDialog
+import com.aura.app.ui.recordings.RecordingsScreen
 import com.aura.app.ui.settings.SettingsScreen
 import com.aura.app.ui.theme.AuraTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
 private object Routes {
     const val MAIN = "main"
     const val SETTINGS = "settings"
+    const val RECORDINGS = "recordings"
 }
 
 @Composable
@@ -74,10 +76,16 @@ private fun AuraApp() {
 
     NavHost(navController = navController, startDestination = Routes.MAIN) {
         composable(Routes.MAIN) {
-            MainScreen(onSettingsClick = { navController.navigate(Routes.SETTINGS) })
+            MainScreen(
+                onSettingsClick = { navController.navigate(Routes.SETTINGS) },
+                onRecordingsClick = { navController.navigate(Routes.RECORDINGS) }
+            )
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable(Routes.RECORDINGS) {
+            RecordingsScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

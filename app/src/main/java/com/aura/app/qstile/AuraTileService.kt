@@ -54,7 +54,7 @@ class AuraTileService : TileService() {
         super.onClick()
         when (recordingStateHolder.status.value) {
             is RecordingStatus.Idle -> RecordingService.start(applicationContext)
-            is RecordingStatus.Recording -> RecordingService.stop(applicationContext)
+            is RecordingStatus.Recording, is RecordingStatus.Paused -> RecordingService.stop(applicationContext)
         }
     }
 
@@ -87,6 +87,13 @@ class AuraTileService : TileService() {
                         delay(120)
                     }
                 }
+            }
+            is RecordingStatus.Paused -> {
+                tile.state = Tile.STATE_ACTIVE
+                tile.label = getString(R.string.tile_label_paused)
+                setSubtitleIfSupported(tile, getString(R.string.tile_subtitle_paused))
+                tile.icon = Icon.createWithResource(this, R.drawable.ic_aura_mono)
+                tile.updateTile()
             }
         }
     }

@@ -21,6 +21,28 @@ class RecordingStateHolder @Inject constructor() {
         _status.value = RecordingStatus.Recording(startedAtMillis)
     }
 
+    fun setPaused() {
+        val current = _status.value
+        if (current is RecordingStatus.Recording) {
+            _status.value = RecordingStatus.Paused(
+                startedAtMillis = current.startedAtMillis,
+                pausedAtMillis = System.currentTimeMillis(),
+                accumulatedPausedMillis = current.accumulatedPausedMillis
+            )
+        }
+    }
+
+    fun setResumed() {
+        val current = _status.value
+        if (current is RecordingStatus.Paused) {
+            val justPausedMillis = System.currentTimeMillis() - current.pausedAtMillis
+            _status.value = RecordingStatus.Recording(
+                startedAtMillis = current.startedAtMillis,
+                accumulatedPausedMillis = current.accumulatedPausedMillis + justPausedMillis
+            )
+        }
+    }
+
     fun setIdle() {
         _status.value = RecordingStatus.Idle
     }

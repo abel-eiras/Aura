@@ -5,9 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IconButton
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.outlined.PauseCircle
+import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +38,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun MainScreen(
     onSettingsClick: () -> Unit,
+    onRecordingsClick: () -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val recordingStatus by viewModel.recordingStatus.collectAsStateWithLifecycle()
@@ -40,14 +46,19 @@ fun MainScreen(
 
     Scaffold { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            IconButton(
-                onClick = onSettingsClick,
-                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Settings,
-                    contentDescription = stringResource(R.string.content_description_settings)
-                )
+            Row(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+                IconButton(onClick = onRecordingsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.List,
+                        contentDescription = stringResource(R.string.content_description_recordings)
+                    )
+                }
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = stringResource(R.string.content_description_settings)
+                    )
+                }
             }
 
             Column(
@@ -55,14 +66,30 @@ fun MainScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val isRecording = recordingStatus is RecordingStatus.Recording
+                val isActivelyRecording = recordingStatus is RecordingStatus.Recording
 
                 AuraOrb(
-                    isRecording = isRecording,
+                    isRecording = isActivelyRecording,
                     modifier = Modifier.clickable { viewModel.toggleRecording() }
                 )
 
                 StatusText(recordingStatus, accountState.isSignedIn)
+
+                if (recordingStatus !is RecordingStatus.Idle) {
+                    val isPaused = recordingStatus is RecordingStatus.Paused
+                    IconButton(
+                        onClick = { viewModel.togglePause() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isPaused) Icons.Outlined.PlayCircle else Icons.Outlined.PauseCircle,
+                            contentDescription = stringResource(
+                                if (isPaused) R.string.content_description_resume else R.string.content_description_pause
+                            ),
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -72,16 +99,21 @@ fun MainScreen(
 private fun StatusText(status: RecordingStatus, isSignedIn: Boolean) {
     val text = when {
         status is RecordingStatus.Recording -> {
-            var elapsedSeconds by remember(status.startedAtMillis) {
-                mutableLongStateOf((System.currentTimeMillis() - status.startedAtMillis) / 1000)
+            var elapsedSeconds by remember(status.startedAtMillis, status.accumulatedPausedMillis) {
+                val elapsedMillis = System.currentTimeMillis() - status.startedAtMillis - status.accumulatedPausedMillis
+                mutableLongStateOf(elapsedMillis / 1000)
             }
-            LaunchedEffect(status.startedAtMillis) {
+            LaunchedEffect(status.startedAtMillis, status.accumulatedPausedMillis) {
                 while (true) {
-                    elapsedSeconds = (System.currentTimeMillis() - status.startedAtMillis) / 1000
+                    elapsedSeconds = (System.currentTimeMillis() - status.startedAtMillis - status.accumulatedPausedMillis) / 1000
                     delay(1000)
                 }
             }
             stringResource(R.string.status_recording, formatElapsed(elapsedSeconds))
+        }
+        status is RecordingStatus.Paused -> {
+            val elapsedSeconds = (status.pausedAtMillis - status.startedAtMillis - status.accumulatedPausedMillis) / 1000
+            stringResource(R.string.status_paused, formatElapsed(elapsedSeconds))
         }
         isSignedIn -> stringResource(R.string.status_idle_ready)
         else -> stringResource(R.string.status_not_authenticated)

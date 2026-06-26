@@ -55,6 +55,14 @@ class AudioRecorderEngine @Inject constructor(
         return file
     }
 
+    fun pause() {
+        runCatching { mediaRecorder?.pause() }
+    }
+
+    fun resume() {
+        runCatching { mediaRecorder?.resume() }
+    }
+
     /** Returns the finished file, or null if the recording was too short/invalid to keep. */
     fun stop(): File? {
         val file = outputFile
