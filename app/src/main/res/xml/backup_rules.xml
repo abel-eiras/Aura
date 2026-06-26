@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Exclude encrypted auth prefs from auto backup; tokens must not be restored onto another device. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="aura_secure_prefs.xml" />
+    <exclude domain="file" path="recordings/" />
+</full-backup-content>

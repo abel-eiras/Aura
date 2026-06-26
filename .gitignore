@@ -1,0 +1,17 @@
+*.iml
+.gradle/
+.idea/
+local.properties
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# OAuth credentials - never commit your real one
+app/google-services.json
+
+# Gradle wrapper jar isn't checked in here - see README for how to generate it
+gradle/wrapper/gradle-wrapper.jar

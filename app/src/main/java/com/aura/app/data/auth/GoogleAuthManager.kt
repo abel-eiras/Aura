@@ -1,0 +1,68 @@
+package com.aura.app.data.auth
+
+import android.content.Context
+import android.content.Intent
+import com.aura.app.data.prefs.SecurePrefs
+import com.aura.app.util.Constants
+import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * Wraps Google Sign-In for the drive.file scope. Access tokens are fetched
+ * fresh from Play Services on demand (it maintains its own refresh cache);
+ * we additionally cache the last-known token in SecurePrefs purely so the
+ * upload worker has something to try before falling back to a blocking
+ * token fetch.
+ */
+@Singleton
+class GoogleAuthManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val securePrefs: SecurePrefs
+) {
+    private val signInOptions: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestEmail()
+        .requestScopes(Scope(Constants.DRIVE_SCOPE))
+        .build()
+
+    val client: GoogleSignInClient by lazy { GoogleSignIn.getClient(context, signInOptions) }
+
+    fun signInIntent(): Intent = client.signInIntent
+
+    fun lastSignedInAccount(): GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(context)
+
+    fun handleSignInResult(data: Intent?): GoogleSignInAccount? {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        return runCatching { task.getResult() }.getOrNull()?.also { account ->
+            securePrefs.accountEmail = account.email
+        }
+    }
+
+    suspend fun signOut() = withContext(Dispatchers.IO) {
+        runCatching { client.revokeAccess() }
+        runCatching { client.signOut() }
+        securePrefs.clear()
+    }
+
+    /** Blocking Play Services call; must run off the main thread. */
+    suspend fun fetchFreshAccessToken(): String? = withContext(Dispatchers.IO) {
+        val account = lastSignedInAccount() ?: return@withContext null
+        runCatching {
+            GoogleAuthUtil.getToken(context, account.account!!, "oauth2:${Constants.DRIVE_SCOPE}")
+        }.onSuccess { token ->
+            securePrefs.cachedAccessToken = token
+        }.getOrNull()
+    }
+
+    fun invalidateToken(token: String) {
+        runCatching { GoogleAuthUtil.clearToken(context, token) }
+    }
+}
