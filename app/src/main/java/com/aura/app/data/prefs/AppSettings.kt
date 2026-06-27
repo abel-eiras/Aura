@@ -27,11 +27,23 @@ class AppSettings @Inject constructor(
         get() = prefs.getString(KEY_LANGUAGE_TAG, null) ?: DEFAULT_LANGUAGE_TAG
         set(value) = prefs.edit { putString(KEY_LANGUAGE_TAG, value) }
 
+    /** Version the user already dismissed the update banner for, so it doesn't nag every launch. */
+    var dismissedUpdateVersion: String?
+        get() = prefs.getString(KEY_DISMISSED_UPDATE_VERSION, null)
+        set(value) = prefs.edit { putString(KEY_DISMISSED_UPDATE_VERSION, value) }
+
+    /** Set once RECORD_AUDIO has been requested, so a later denial can be told apart from "never asked". */
+    var hasRequestedRecordAudioBefore: Boolean
+        get() = prefs.getBoolean(KEY_REQUESTED_RECORD_AUDIO, false)
+        set(value) = prefs.edit { putBoolean(KEY_REQUESTED_RECORD_AUDIO, value) }
+
     companion object {
         private const val PREFS_FILE_NAME = "aura_app_settings"
         private const val KEY_WIFI_ONLY_UPLOAD = "wifi_only_upload"
         private const val KEY_AUDIO_QUALITY = "audio_quality"
         private const val KEY_LANGUAGE_TAG = "language_tag"
+        private const val KEY_DISMISSED_UPDATE_VERSION = "dismissed_update_version"
+        private const val KEY_REQUESTED_RECORD_AUDIO = "requested_record_audio"
         const val DEFAULT_LANGUAGE_TAG = "es-ES"
 
         /** Reads the language tag without DI, for attachBaseContext() calls that run before Hilt's component exists. */

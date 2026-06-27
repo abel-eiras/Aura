@@ -34,6 +34,8 @@
     <string name="content_description_logo">Logo de Aura</string>
     <string name="content_description_pause">Pausar grabación</string>
     <string name="content_description_resume">Reanudar grabación</string>
+    <string name="update_available">La versión %1$s ya está disponible. Toca para descargarla.</string>
+    <string name="update_dismiss">Descartar</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Ajustes</string>
@@ -41,9 +43,8 @@
     <string name="settings_connect_google">Conectar cuenta de Google</string>
     <string name="settings_disconnect">Desconectar</string>
     <string name="settings_connected_as">Conectado como %1$s</string>
-    <string name="settings_request_access">¿No puedes iniciar sesión? Solicita acceso</string>
-    <string name="settings_request_access_email_subject">Solicitud de acceso a Aura</string>
-    <string name="settings_request_access_email_body">¡Hola! Me gustaría usar Aura. ¿Puedes añadir mi cuenta de Google como probador?\n\nMi Gmail: </string>
+    <string name="settings_needs_reauth">El acceso a Drive ha caducado. Reconecta para seguir subiendo grabaciones.</string>
+    <string name="settings_reconnect">Reconectar</string>
     <string name="settings_upload_queue_section">Cola de subida</string>
     <string name="settings_upload_queue_status">%1$d archivo(s) pendiente(s) · %2$s</string>
     <string name="settings_upload_queue_empty">No hay archivos pendientes</string>
@@ -64,6 +65,11 @@
     <string name="permission_rationale_continue">Continuar</string>
     <string name="permission_rationale_not_now">Ahora no</string>
 
+    <!-- Permiso denegado permanentemente -->
+    <string name="permission_denied_title">Permiso de micrófono bloqueado</string>
+    <string name="permission_denied_body">Aura no puede grabar sin acceso al micrófono, y ya no puede solicitarlo directamente. Activa el permiso desde los ajustes del sistema para esta app.</string>
+    <string name="permission_denied_open_settings">Abrir ajustes</string>
+
     <!-- Battery optimization prompt -->
     <string name="battery_optimization_title">Mantén la grabación fiable</string>
     <string name="battery_optimization_body">La optimización de batería de tu dispositivo puede impedir que Aura grabe en segundo plano. Exime a Aura de la optimización de batería para que las grabaciones largas no se corten.</string>
@@ -76,6 +82,7 @@
     <string name="recordings_status_uploaded">Subida</string>
     <string name="recordings_status_failed">Subida fallida</string>
     <string name="recordings_retry">Reintentar</string>
+    <string name="recordings_retry_all">Reintentar todo</string>
     <string name="recordings_delete">Eliminar</string>
     <string name="recordings_delete_cancel">Cancelar</string>
     <string name="recordings_delete_confirm_title">¿Eliminar grabación?</string>

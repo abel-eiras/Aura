@@ -34,6 +34,8 @@
     <string name="content_description_logo">Aura logo</string>
     <string name="content_description_pause">Pause recording</string>
     <string name="content_description_resume">Resume recording</string>
+    <string name="update_available">Version %1$s is available. Tap to download.</string>
+    <string name="update_dismiss">Dismiss</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Settings</string>
@@ -41,9 +43,8 @@
     <string name="settings_connect_google">Connect Google Account</string>
     <string name="settings_disconnect">Disconnect</string>
     <string name="settings_connected_as">Connected as %1$s</string>
-    <string name="settings_request_access">Can\'t sign in? Request access</string>
-    <string name="settings_request_access_email_subject">Aura access request</string>
-    <string name="settings_request_access_email_body">Hi! I\'d like to use Aura. Could you add my Google account as a tester?\n\nMy Gmail: </string>
+    <string name="settings_needs_reauth">Drive access expired. Reconnect to keep uploading.</string>
+    <string name="settings_reconnect">Reconnect</string>
     <string name="settings_upload_queue_section">Upload queue</string>
     <string name="settings_upload_queue_status">%1$d file(s) pending · %2$s</string>
     <string name="settings_upload_queue_empty">No files pending</string>
@@ -64,6 +65,11 @@
     <string name="permission_rationale_continue">Continue</string>
     <string name="permission_rationale_not_now">Not now</string>
 
+    <!-- Permanently denied permission -->
+    <string name="permission_denied_title">Microphone permission blocked</string>
+    <string name="permission_denied_body">Aura can\'t record without microphone access, and it can no longer ask directly. Enable it from this app\'s system settings.</string>
+    <string name="permission_denied_open_settings">Open settings</string>
+
     <!-- Battery optimization prompt -->
     <string name="battery_optimization_title">Keep recording reliable</string>
     <string name="battery_optimization_body">Your device\'s battery optimization can stop Aura from recording in the background. Exempt Aura from battery optimization so long recordings aren\'t cut off.</string>
@@ -76,6 +82,7 @@
     <string name="recordings_status_uploaded">Uploaded</string>
     <string name="recordings_status_failed">Upload failed</string>
     <string name="recordings_retry">Retry</string>
+    <string name="recordings_retry_all">Retry all</string>
     <string name="recordings_delete">Delete</string>
     <string name="recordings_delete_cancel">Cancel</string>
     <string name="recordings_delete_confirm_title">Delete recording?</string>

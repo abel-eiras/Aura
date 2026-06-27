@@ -6,6 +6,7 @@ import com.aura.app.domain.model.LocalRecording
 import com.aura.app.domain.usecase.DeleteRecordingUseCase
 import com.aura.app.domain.usecase.GetRecordingsUseCase
 import com.aura.app.domain.usecase.RemoveUploadHistoryEntryUseCase
+import com.aura.app.domain.usecase.RetryPendingUploadsUseCase
 import com.aura.app.domain.usecase.RetryUploadUseCase
 import com.aura.app.recording.RecordingPlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 class RecordingsViewModel @Inject constructor(
     private val getRecordingsUseCase: GetRecordingsUseCase,
     private val retryUploadUseCase: RetryUploadUseCase,
+    private val retryPendingUploadsUseCase: RetryPendingUploadsUseCase,
     private val deleteRecordingUseCase: DeleteRecordingUseCase,
     private val removeUploadHistoryEntryUseCase: RemoveUploadHistoryEntryUseCase,
     private val playbackController: RecordingPlaybackController
@@ -41,6 +43,11 @@ class RecordingsViewModel @Inject constructor(
 
     fun retry(filePath: String) {
         retryUploadUseCase(filePath)
+        refresh()
+    }
+
+    fun retryAll() {
+        retryPendingUploadsUseCase()
         refresh()
     }
 

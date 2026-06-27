@@ -25,7 +25,8 @@ object Constants {
     /** Caps the persisted "uploaded" history so it can't grow unbounded either. */
     const val MAX_UPLOAD_HISTORY_ENTRIES = 200
 
-    /** While the OAuth consent screen is in "Testing" mode, only accounts added as test users in
-     * Google Cloud Console can sign in - this is who Settings' "Request access" button emails. */
-    const val SUPPORT_EMAIL = "abel.eiras.espino@gmail.com"
+    const val GITHUB_API_BASE_URL = "https://api.github.com/"
+    const val GITHUB_OWNER = "abel-eiras"
+    const val GITHUB_REPO = "Aura"
+    const val GITHUB_RELEASES_PAGE_URL = "https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/latest"
 }

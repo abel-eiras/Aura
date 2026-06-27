@@ -72,6 +72,13 @@ fun RecordingsScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
                     }
+                },
+                actions = {
+                    if (recordings.any { it.uploadState == UploadState.FAILED }) {
+                        TextButton(onClick = { viewModel.retryAll() }) {
+                            Text(stringResource(R.string.recordings_retry_all))
+                        }
+                    }
                 }
             )
         }
