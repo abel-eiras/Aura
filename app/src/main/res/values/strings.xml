@@ -66,13 +66,16 @@
     <string name="recordings_title">Recordings</string>
     <string name="recordings_empty">No recordings yet</string>
     <string name="recordings_status_pending">Pending upload</string>
+    <string name="recordings_status_uploaded">Uploaded</string>
     <string name="recordings_status_failed">Upload failed</string>
     <string name="recordings_retry">Retry</string>
     <string name="recordings_delete">Delete</string>
     <string name="recordings_delete_cancel">Cancel</string>
     <string name="recordings_delete_confirm_title">Delete recording?</string>
     <string name="recordings_delete_confirm_body">This recording will be removed from this device. If it hasn\'t been uploaded yet, it will be lost.</string>
+    <string name="recordings_delete_confirm_body_uploaded">This only removes it from this history list. The file already uploaded stays in your Drive.</string>
     <string name="content_description_play_recording">Play recording</string>
     <string name="content_description_stop_playback">Stop playback</string>
     <string name="content_description_delete_recording">Delete recording</string>
+    <string name="content_description_uploaded">Uploaded to Drive</string>
 </resources>

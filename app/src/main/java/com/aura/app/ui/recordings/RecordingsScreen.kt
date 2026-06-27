@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CloudDone
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Stop
@@ -54,7 +55,7 @@ fun RecordingsScreen(
 ) {
     val recordings by viewModel.recordings.collectAsStateWithLifecycle()
     val playingFilePath by viewModel.playingFilePath.collectAsStateWithLifecycle()
-    var pendingDeleteFilePath by remember { mutableStateOf<String?>(null) }
+    var pendingDelete by remember { mutableStateOf<LocalRecording?>(null) }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -85,13 +86,13 @@ fun RecordingsScreen(
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
-                items(recordings, key = { it.filePath }) { recording ->
+                items(recordings, key = { it.fileName }) { recording ->
                     RecordingRow(
                         recording = recording,
                         isPlaying = playingFilePath == recording.filePath,
-                        onPlayToggle = { viewModel.togglePlayback(recording.filePath) },
-                        onRetry = { viewModel.retry(recording.filePath) },
-                        onDeleteClick = { pendingDeleteFilePath = recording.filePath }
+                        onPlayToggle = { recording.filePath?.let { viewModel.togglePlayback(it) } },
+                        onRetry = { recording.filePath?.let { viewModel.retry(it) } },
+                        onDeleteClick = { pendingDelete = recording }
                     )
                     HorizontalDivider()
                 }
@@ -99,21 +100,32 @@ fun RecordingsScreen(
         }
     }
 
-    pendingDeleteFilePath?.let { filePath ->
+    pendingDelete?.let { recording ->
+        val isUploaded = recording.uploadState == UploadState.UPLOADED
         AlertDialog(
-            onDismissRequest = { pendingDeleteFilePath = null },
+            onDismissRequest = { pendingDelete = null },
             title = { Text(stringResource(R.string.recordings_delete_confirm_title)) },
-            text = { Text(stringResource(R.string.recordings_delete_confirm_body)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (isUploaded) {
+                            R.string.recordings_delete_confirm_body_uploaded
+                        } else {
+                            R.string.recordings_delete_confirm_body
+                        }
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.delete(filePath)
-                    pendingDeleteFilePath = null
+                    viewModel.delete(recording)
+                    pendingDelete = null
                 }) {
                     Text(stringResource(R.string.recordings_delete))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDeleteFilePath = null }) {
+                TextButton(onClick = { pendingDelete = null }) {
                     Text(stringResource(R.string.recordings_delete_cancel))
                 }
             }
@@ -135,13 +147,22 @@ private fun RecordingRow(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = onPlayToggle) {
-            Icon(
-                imageVector = if (isPlaying) Icons.Outlined.Stop else Icons.Outlined.PlayArrow,
-                contentDescription = stringResource(
-                    if (isPlaying) R.string.content_description_stop_playback else R.string.content_description_play_recording
+        if (recording.filePath != null) {
+            IconButton(onClick = onPlayToggle) {
+                Icon(
+                    imageVector = if (isPlaying) Icons.Outlined.Stop else Icons.Outlined.PlayArrow,
+                    contentDescription = stringResource(
+                        if (isPlaying) R.string.content_description_stop_playback else R.string.content_description_play_recording
+                    )
                 )
-            )
+            }
+        } else {
+            IconButton(onClick = {}, enabled = false) {
+                Icon(
+                    imageVector = Icons.Outlined.CloudDone,
+                    contentDescription = stringResource(R.string.content_description_uploaded)
+                )
+            }
         }
 
         Column(modifier = Modifier.weight(1f).padding(start = 8.dp, top = 12.dp)) {
@@ -171,6 +192,7 @@ private fun RecordingRow(
 @Composable
 private fun statusLabel(state: UploadState): String = when (state) {
     UploadState.QUEUED -> stringResource(R.string.recordings_status_pending)
+    UploadState.UPLOADED -> stringResource(R.string.recordings_status_uploaded)
     UploadState.FAILED -> stringResource(R.string.recordings_status_failed)
 }
 

@@ -1,7 +1,8 @@
 package com.aura.app.domain.model
 
-enum class AudioQuality(val bitRate: Int, val sampleRate: Int) {
-    LOW(32_000, 44_100),
-    NORMAL(64_000, 48_000),
-    HIGH(128_000, 48_000)
+/** Recordings are uncompressed 16-bit PCM WAV, so quality is just the sample rate. */
+enum class AudioQuality(val sampleRate: Int) {
+    LOW(22_050),
+    NORMAL(44_100),
+    HIGH(48_000)
 }
