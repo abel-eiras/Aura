@@ -11,6 +11,9 @@
     <string name="tile_subtitle_recording">Toca para detener</string>
     <string name="tile_subtitle_paused">Toca para detener</string>
 
+    <!-- Widget de pantalla de inicio -->
+    <string name="widget_description">Toca para empezar o detener la grabación</string>
+
     <!-- Foreground service notification -->
     <string name="notification_title">Aura</string>
     <string name="notification_text_recording">Grabando audio</string>

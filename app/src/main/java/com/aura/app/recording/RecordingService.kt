@@ -17,8 +17,16 @@ import com.aura.app.data.upload.UploadQueueRepository
 import com.aura.app.domain.model.RecordingStatus
 import com.aura.app.util.Constants
 import com.aura.app.util.LocaleHelper
+import com.aura.app.widget.AuraWidgetProvider
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RecordingService : Service() {
@@ -29,6 +37,8 @@ class RecordingService : Service() {
     @Inject lateinit var callStateMonitor: CallStateMonitor
 
     private var pausedForCall = false
+    private val serviceScope = CoroutineScope(SupervisorJob())
+    private var widgetSpinJob: Job? = null
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrap(newBase))
@@ -39,6 +49,11 @@ class RecordingService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -56,6 +71,7 @@ class RecordingService : Service() {
         audioRecorderEngine.start(uploadQueueRepository.recordingsDir())
         recordingStateHolder.setRecording(System.currentTimeMillis())
         callStateMonitor.start(onCallActive = ::handleCallActive, onCallEnded = ::handleCallEnded)
+        startWidgetSpin()
     }
 
     private fun pauseRecording() {
@@ -63,6 +79,7 @@ class RecordingService : Service() {
         audioRecorderEngine.pause()
         recordingStateHolder.setPaused()
         updateNotification(isPaused = true)
+        stopWidgetSpin()
     }
 
     private fun resumeRecording() {
@@ -70,6 +87,25 @@ class RecordingService : Service() {
         audioRecorderEngine.resume()
         recordingStateHolder.setResumed()
         updateNotification(isPaused = false)
+        startWidgetSpin()
+    }
+
+    private fun startWidgetSpin() {
+        widgetSpinJob?.cancel()
+        widgetSpinJob = serviceScope.launch {
+            var angle = 0f
+            while (isActive) {
+                AuraWidgetProvider.renderSpinning(this@RecordingService, angle)
+                angle = (angle + 18f) % 360f
+                delay(120)
+            }
+        }
+    }
+
+    private fun stopWidgetSpin() {
+        widgetSpinJob?.cancel()
+        widgetSpinJob = null
+        AuraWidgetProvider.renderStatic(this)
     }
 
     /** Auto-pause for an incoming/active call, distinct from a user-initiated pause. */
@@ -92,6 +128,7 @@ class RecordingService : Service() {
         pausedForCall = false
         val file = audioRecorderEngine.stop()
         recordingStateHolder.setIdle()
+        stopWidgetSpin()
         file?.let { uploadQueueRepository.enqueueUpload(it) }
         uploadQueueRepository.enforceStorageCap()
         stopForeground(STOP_FOREGROUND_REMOVE)
