@@ -125,11 +125,33 @@ queued and uploaded once you sign in).
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MICROPHONE` | Keep recording running reliably while the app is backgrounded. |
 | `INTERNET` | Upload recordings to Google Drive. |
 
-## Note on this build environment
+## Building a signed release
 
-This project was assembled in a sandboxed environment whose network policy
-blocks `dl.google.com` (Google's Maven repository), so a full `./gradlew
-assembleDebug` could not be executed here to verify compilation end-to-end.
-All Gradle/Kotlin/manifest/resource files were written and manually
-cross-checked instead. Please run a full build locally (or in CI) before
-relying on this as a finished artifact, and file/fix anything that surfaces.
+`assembleRelease` runs with R8 minification and resource shrinking on, but
+stays unsigned unless `local.properties` (already gitignored — never commit
+the real one) has a release keystore configured:
+
+```
+RELEASE_STORE_FILE=/absolute/path/to/your-release.keystore
+RELEASE_STORE_PASSWORD=...
+RELEASE_KEY_ALIAS=...
+RELEASE_KEY_PASSWORD=...
+```
+
+Generate the keystore once, somewhere **outside** this repo (e.g. next to your
+debug keystore in `~/.android/`), and keep it backed up — losing it means
+losing the ability to publish updates under the same app identity:
+
+```
+keytool -genkeypair -v -keystore /path/to/your-release.keystore \
+  -alias your-alias -keyalg RSA -keysize 2048 -validity 10000
+```
+
+The release key's SHA-1 fingerprint is **different** from your debug
+keystore's, so Google Sign-In needs its own Android OAuth client
+registered in Google Cloud Console (step 5 above) before sign-in will work
+on a release-signed build. Get it with:
+
+```
+keytool -list -v -keystore /path/to/your-release.keystore -alias your-alias
+```
