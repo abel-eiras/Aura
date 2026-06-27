@@ -24,4 +24,8 @@ object Constants {
 
     /** Caps the persisted "uploaded" history so it can't grow unbounded either. */
     const val MAX_UPLOAD_HISTORY_ENTRIES = 200
+
+    /** While the OAuth consent screen is in "Testing" mode, only accounts added as test users in
+     * Google Cloud Console can sign in - this is who Settings' "Request access" button emails. */
+    const val SUPPORT_EMAIL = "abel.eiras.espino@gmail.com"
 }

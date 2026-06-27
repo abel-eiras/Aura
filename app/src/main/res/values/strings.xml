@@ -41,6 +41,9 @@
     <string name="settings_connect_google">Connect Google Account</string>
     <string name="settings_disconnect">Disconnect</string>
     <string name="settings_connected_as">Connected as %1$s</string>
+    <string name="settings_request_access">Can\'t sign in? Request access</string>
+    <string name="settings_request_access_email_subject">Aura access request</string>
+    <string name="settings_request_access_email_body">Hi! I\'d like to use Aura. Could you add my Google account as a tester?\n\nMy Gmail: </string>
     <string name="settings_upload_queue_section">Upload queue</string>
     <string name="settings_upload_queue_status">%1$d file(s) pending · %2$s</string>
     <string name="settings_upload_queue_empty">No files pending</string>

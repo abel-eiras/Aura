@@ -41,6 +41,9 @@
     <string name="settings_connect_google">Conectar conta de Google</string>
     <string name="settings_disconnect">Desconectar</string>
     <string name="settings_connected_as">Conectado como %1$s</string>
+    <string name="settings_request_access">Non podes iniciar sesión? Solicita acceso</string>
+    <string name="settings_request_access_email_subject">Solicitude de acceso a Aura</string>
+    <string name="settings_request_access_email_body">Ola! Gustaríame usar Aura. Podes engadir a miña conta de Google como proba?\n\nO meu Gmail: </string>
     <string name="settings_upload_queue_section">Cola de subida</string>
     <string name="settings_upload_queue_status">%1$d ficheiro(s) pendente(s) · %2$s</string>
     <string name="settings_upload_queue_empty">Non hai ficheiros pendentes</string>

@@ -2,6 +2,8 @@ package com.aura.app.ui.settings
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aura.app.R
 import com.aura.app.domain.model.AppLanguage
 import com.aura.app.domain.model.AudioQuality
+import com.aura.app.util.Constants
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,6 +92,22 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.settings_connect_google))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                val accessSubject = stringResource(R.string.settings_request_access_email_subject)
+                val accessBody = stringResource(R.string.settings_request_access_email_body)
+                TextButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).apply {
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf(Constants.SUPPORT_EMAIL))
+                            putExtra(Intent.EXTRA_SUBJECT, accessSubject)
+                            putExtra(Intent.EXTRA_TEXT, accessBody)
+                        }
+                        runCatching { context.startActivity(intent) }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.settings_request_access))
                 }
             }
 
