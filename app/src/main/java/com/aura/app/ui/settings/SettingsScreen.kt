@@ -1,5 +1,6 @@
 package com.aura.app.ui.settings
 
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,11 +29,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aura.app.R
+import com.aura.app.domain.model.AppLanguage
 import com.aura.app.domain.model.AudioQuality
 import java.util.Locale
 
@@ -42,10 +45,12 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     val queueStatus by viewModel.queueStatus.collectAsStateWithLifecycle()
     val wifiOnlyUpload by viewModel.wifiOnlyUpload.collectAsStateWithLifecycle()
     val audioQuality by viewModel.audioQuality.collectAsStateWithLifecycle()
+    val language by viewModel.language.collectAsStateWithLifecycle()
 
     val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -128,6 +133,23 @@ fun SettingsScreen(
                         shape = SegmentedButtonDefaults.itemShape(index = index, count = AudioQuality.entries.size)
                     ) {
                         Text(stringResource(quality.labelRes()))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            SettingsSection(stringResource(R.string.settings_language_section))
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                AppLanguage.entries.forEachIndexed { index, lang ->
+                    SegmentedButton(
+                        selected = language == lang,
+                        onClick = {
+                            viewModel.setLanguage(lang)
+                            (context as? Activity)?.recreate()
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = AppLanguage.entries.size)
+                    ) {
+                        Text(lang.displayName)
                     }
                 }
             }

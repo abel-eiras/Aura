@@ -23,9 +23,20 @@ class AppSettings @Inject constructor(
             ?: AudioQuality.NORMAL
         set(value) = prefs.edit { putString(KEY_AUDIO_QUALITY, value.name) }
 
-    private companion object {
-        const val PREFS_FILE_NAME = "aura_app_settings"
-        const val KEY_WIFI_ONLY_UPLOAD = "wifi_only_upload"
-        const val KEY_AUDIO_QUALITY = "audio_quality"
+    var languageTag: String
+        get() = prefs.getString(KEY_LANGUAGE_TAG, null) ?: DEFAULT_LANGUAGE_TAG
+        set(value) = prefs.edit { putString(KEY_LANGUAGE_TAG, value) }
+
+    companion object {
+        private const val PREFS_FILE_NAME = "aura_app_settings"
+        private const val KEY_WIFI_ONLY_UPLOAD = "wifi_only_upload"
+        private const val KEY_AUDIO_QUALITY = "audio_quality"
+        private const val KEY_LANGUAGE_TAG = "language_tag"
+        const val DEFAULT_LANGUAGE_TAG = "es-ES"
+
+        /** Reads the language tag without DI, for attachBaseContext() calls that run before Hilt's component exists. */
+        fun currentLanguageTag(context: Context): String =
+            context.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_LANGUAGE_TAG, null) ?: DEFAULT_LANGUAGE_TAG
     }
 }

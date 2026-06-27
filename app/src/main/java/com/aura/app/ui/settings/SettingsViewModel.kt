@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.aura.app.data.auth.GoogleAuthManager
 import com.aura.app.data.prefs.AppSettings
 import com.aura.app.domain.model.AccountState
+import com.aura.app.domain.model.AppLanguage
 import com.aura.app.domain.model.AudioQuality
 import com.aura.app.domain.model.UploadQueueStatus
 import com.aura.app.domain.usecase.GetAccountStateUseCase
@@ -43,6 +44,9 @@ class SettingsViewModel @Inject constructor(
     private val _audioQuality = MutableStateFlow(appSettings.audioQuality)
     val audioQuality: StateFlow<AudioQuality> = _audioQuality
 
+    private val _language = MutableStateFlow(AppLanguage.fromTag(appSettings.languageTag))
+    val language: StateFlow<AppLanguage> = _language
+
     val versionName: String = runCatching {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName
     }.getOrNull() ?: "1.0.0"
@@ -55,6 +59,11 @@ class SettingsViewModel @Inject constructor(
     fun setAudioQuality(quality: AudioQuality) {
         appSettings.audioQuality = quality
         _audioQuality.value = quality
+    }
+
+    fun setLanguage(language: AppLanguage) {
+        appSettings.languageTag = language.tag
+        _language.value = language
     }
 
     fun signInIntent(): Intent = authManager.signInIntent()

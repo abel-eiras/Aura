@@ -16,6 +16,7 @@ import com.aura.app.R
 import com.aura.app.data.upload.UploadQueueRepository
 import com.aura.app.domain.model.RecordingStatus
 import com.aura.app.util.Constants
+import com.aura.app.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -28,6 +29,10 @@ class RecordingService : Service() {
     @Inject lateinit var callStateMonitor: CallStateMonitor
 
     private var pausedForCall = false
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 

@@ -1,6 +1,7 @@
 package com.aura.app
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -29,10 +30,15 @@ import com.aura.app.ui.permissions.PermissionRationaleDialog
 import com.aura.app.ui.recordings.RecordingsScreen
 import com.aura.app.ui.settings.SettingsScreen
 import com.aura.app.ui.theme.AuraTheme
+import com.aura.app.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

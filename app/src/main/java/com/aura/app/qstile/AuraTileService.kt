@@ -1,5 +1,6 @@
 package com.aura.app.qstile
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -14,6 +15,7 @@ import com.aura.app.R
 import com.aura.app.domain.model.RecordingStatus
 import com.aura.app.recording.RecordingService
 import com.aura.app.recording.RecordingStateHolder
+import com.aura.app.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +36,10 @@ class AuraTileService : TileService() {
     private var collectJob: Job? = null
     private var rotationJob: Job? = null
     private var rotationAngle = 0f
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(base))
+    }
 
     override fun onStartListening() {
         super.onStartListening()

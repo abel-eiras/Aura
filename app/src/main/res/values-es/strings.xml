@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Aura</string>
+    <string name="app_description">Grabadora de voz</string>
+
+    <!-- Quick Settings tile -->
+    <string name="tile_label_idle">Aura</string>
+    <string name="tile_label_recording">Aura · Grabando</string>
+    <string name="tile_label_paused">Aura · Pausado</string>
+    <string name="tile_subtitle_idle">Toca para grabar</string>
+    <string name="tile_subtitle_recording">Toca para detener</string>
+    <string name="tile_subtitle_paused">Toca para detener</string>
+
+    <!-- Foreground service notification -->
+    <string name="notification_title">Aura</string>
+    <string name="notification_text_recording">Grabando audio</string>
+    <string name="notification_text_paused">Grabación en pausa</string>
+    <string name="notification_action_pause">Pausar</string>
+    <string name="notification_action_resume">Reanudar</string>
+    <string name="notification_action_stop">Detener</string>
+    <string name="notification_channel_name">Grabación</string>
+    <string name="notification_channel_description">Se muestra mientras Aura está grabando audio</string>
+
+    <!-- Main screen -->
+    <string name="status_not_authenticated">Conecta tu cuenta en ajustes</string>
+    <string name="status_idle_ready">Listo para grabar</string>
+    <string name="status_recording">Grabando audio · %1$s</string>
+    <string name="status_paused">En pausa · %1$s</string>
+    <string name="content_description_settings">Ajustes</string>
+    <string name="content_description_recordings">Grabaciones</string>
+    <string name="content_description_logo">Logo de Aura</string>
+    <string name="content_description_pause">Pausar grabación</string>
+    <string name="content_description_resume">Reanudar grabación</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_account_section">Cuenta</string>
+    <string name="settings_connect_google">Conectar cuenta de Google</string>
+    <string name="settings_disconnect">Desconectar</string>
+    <string name="settings_connected_as">Conectado como %1$s</string>
+    <string name="settings_upload_queue_section">Cola de subida</string>
+    <string name="settings_upload_queue_status">%1$d archivo(s) pendiente(s) · %2$s</string>
+    <string name="settings_upload_queue_empty">No hay archivos pendientes</string>
+    <string name="settings_uploads_section">Subidas</string>
+    <string name="settings_wifi_only_upload">Subir solo con Wi-Fi</string>
+    <string name="settings_wifi_only_upload_description">Retrasa las subidas hasta conectarte a Wi-Fi, para no usar datos móviles.</string>
+    <string name="settings_audio_quality_section">Calidad de audio</string>
+    <string name="settings_audio_quality_low">Baja</string>
+    <string name="settings_audio_quality_normal">Normal</string>
+    <string name="settings_audio_quality_high">Alta</string>
+    <string name="settings_language_section">Idioma</string>
+    <string name="settings_about_section">Acerca de</string>
+    <string name="settings_version">Versión %1$s</string>
+
+    <!-- Permission rationale -->
+    <string name="permission_rationale_title">Se necesita acceso al micrófono</string>
+    <string name="permission_rationale_body">Aura grava audio en los archivos que crea. Necesita acceso al micrófono para grabar, acceso a notificaciones para que veas cuándo hay una grabación activa, y acceso al estado del teléfono para pausarse automáticamente durante una llamada.</string>
+    <string name="permission_rationale_continue">Continuar</string>
+    <string name="permission_rationale_not_now">Ahora no</string>
+
+    <!-- Battery optimization prompt -->
+    <string name="battery_optimization_title">Mantén la grabación fiable</string>
+    <string name="battery_optimization_body">La optimización de batería de tu dispositivo puede impedir que Aura grabe en segundo plano. Exime a Aura de la optimización de batería para que las grabaciones largas no se corten.</string>
+    <string name="battery_optimization_continue">Abrir ajustes</string>
+
+    <!-- Recordings screen -->
+    <string name="recordings_title">Grabaciones</string>
+    <string name="recordings_empty">Todavía no hay grabaciones</string>
+    <string name="recordings_status_pending">Pendiente de subir</string>
+    <string name="recordings_status_uploaded">Subida</string>
+    <string name="recordings_status_failed">Subida fallida</string>
+    <string name="recordings_retry">Reintentar</string>
+    <string name="recordings_delete">Eliminar</string>
+    <string name="recordings_delete_cancel">Cancelar</string>
+    <string name="recordings_delete_confirm_title">¿Eliminar grabación?</string>
+    <string name="recordings_delete_confirm_body">Esta grabación se eliminará de este dispositivo. Si todavía no se ha subido, se perderá.</string>
+    <string name="recordings_delete_confirm_body_uploaded">Esto solo la elimina de esta lista de historial. El archivo ya subido permanece en tu Drive.</string>
+    <string name="content_description_play_recording">Reproducir grabación</string>
+    <string name="content_description_stop_playback">Detener reproducción</string>
+    <string name="content_description_delete_recording">Eliminar grabación</string>
+    <string name="content_description_uploaded">Subido a Drive</string>
+</resources>
