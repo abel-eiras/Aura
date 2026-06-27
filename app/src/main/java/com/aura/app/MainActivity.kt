@@ -92,6 +92,7 @@ private fun AuraApp() {
 
 private fun requiredPermissions(): Array<String> = buildList {
     add(Manifest.permission.RECORD_AUDIO)
+    add(Manifest.permission.READ_PHONE_STATE)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         add(Manifest.permission.POST_NOTIFICATIONS)
     }

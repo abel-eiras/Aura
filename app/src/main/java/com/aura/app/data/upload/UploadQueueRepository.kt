@@ -53,6 +53,19 @@ class UploadQueueRepository @Inject constructor(
     /** Called on app start / sign-in to retry anything left over from a previous session. */
     fun enqueueAllPending() {
         recordingsDir().listFiles().orEmpty().forEach { enqueueUpload(it) }
+        enforceStorageCap()
+    }
+
+    /** Deletes the oldest pending recordings until local storage is back under the cap. */
+    fun enforceStorageCap() {
+        val files = recordingsDir().listFiles().orEmpty().sortedBy { it.lastModified() }.toMutableList()
+        var totalBytes = files.sumOf { it.length() }
+        while (totalBytes > Constants.MAX_PENDING_STORAGE_BYTES && files.isNotEmpty()) {
+            val oldest = files.removeAt(0)
+            workManager.cancelUniqueWork(Constants.UPLOAD_WORK_NAME_PREFIX + oldest.name)
+            totalBytes -= oldest.length()
+            oldest.delete()
+        }
     }
 
     /** Local recordings not yet successfully uploaded, newest first. */

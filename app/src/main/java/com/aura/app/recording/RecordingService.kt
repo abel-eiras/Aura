@@ -25,6 +25,9 @@ class RecordingService : Service() {
     @Inject lateinit var audioRecorderEngine: AudioRecorderEngine
     @Inject lateinit var recordingStateHolder: RecordingStateHolder
     @Inject lateinit var uploadQueueRepository: UploadQueueRepository
+    @Inject lateinit var callStateMonitor: CallStateMonitor
+
+    private var pausedForCall = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -47,6 +50,7 @@ class RecordingService : Service() {
         startForegroundWithNotification(isPaused = false)
         audioRecorderEngine.start(uploadQueueRepository.recordingsDir())
         recordingStateHolder.setRecording(System.currentTimeMillis())
+        callStateMonitor.start(onCallActive = ::handleCallActive, onCallEnded = ::handleCallEnded)
     }
 
     private fun pauseRecording() {
@@ -63,10 +67,28 @@ class RecordingService : Service() {
         updateNotification(isPaused = false)
     }
 
+    /** Auto-pause for an incoming/active call, distinct from a user-initiated pause. */
+    private fun handleCallActive() {
+        if (recordingStateHolder.status.value is RecordingStatus.Recording) {
+            pauseRecording()
+            pausedForCall = true
+        }
+    }
+
+    private fun handleCallEnded() {
+        if (pausedForCall) {
+            pausedForCall = false
+            resumeRecording()
+        }
+    }
+
     private fun stopRecording() {
+        callStateMonitor.stop()
+        pausedForCall = false
         val file = audioRecorderEngine.stop()
         recordingStateHolder.setIdle()
         file?.let { uploadQueueRepository.enqueueUpload(it) }
+        uploadQueueRepository.enforceStorageCap()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

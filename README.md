@@ -10,7 +10,14 @@ screen all say plainly when recording is active.
 - While recording, a persistent notification reads "Aura — Recording audio"
   and the main screen shows a live elapsed-time counter.
 - Recordings are queued for upload and retried automatically (with backoff) if
-  the network is unavailable.
+  the network is unavailable, and on app launch as well.
+- You can pause/resume a recording in progress, from the app, the
+  notification, or automatically while a phone call is active.
+- The **Recordings** screen lists local recordings with upload status, lets
+  you play them back, and retry any that failed.
+- Local storage for not-yet-uploaded recordings is capped; if uploads keep
+  failing, the oldest pending recordings are dropped rather than filling the
+  device.
 - You authenticate with your own Google account; the app only requests the
   narrow `drive.file` scope, which lets it see/create files *it* uploads — not
   your existing Drive contents.
@@ -102,17 +109,18 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 Or open the project in Android Studio (Iguana+) and run it on a device/emulator
 directly — Studio will handle SDK/Gradle setup for you.
 
-On first launch, Aura asks for the **Record Audio** and **Notifications**
-permissions with a plain-language explanation of why each is needed. Sign in
-with a Google account from the **Settings** screen before recording, so
-uploads can succeed (recordings made while signed out are queued and uploaded
-once you sign in).
+On first launch, Aura asks for the **Record Audio**, **Phone State**, and
+**Notifications** permissions with a plain-language explanation of why each is
+needed. Sign in with a Google account from the **Settings** screen before
+recording, so uploads can succeed (recordings made while signed out are
+queued and uploaded once you sign in).
 
 ## Permissions requested
 
 | Permission | Why |
 |---|---|
 | `RECORD_AUDIO` | Capture audio from the microphone. |
+| `READ_PHONE_STATE` | Detect incoming/active calls so recording can auto-pause and resume around them. Optional — if denied, recording just continues through calls. |
 | `POST_NOTIFICATIONS` | Show the "Recording audio" foreground-service notification. |
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MICROPHONE` | Keep recording running reliably while the app is backgrounded. |
 | `INTERNET` | Upload recordings to Google Drive. |
