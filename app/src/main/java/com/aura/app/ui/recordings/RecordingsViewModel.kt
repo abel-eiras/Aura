@@ -3,6 +3,7 @@ package com.aura.app.ui.recordings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aura.app.domain.model.LocalRecording
+import com.aura.app.domain.usecase.DeleteRecordingUseCase
 import com.aura.app.domain.usecase.GetRecordingsUseCase
 import com.aura.app.domain.usecase.RetryUploadUseCase
 import com.aura.app.recording.RecordingPlaybackController
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 class RecordingsViewModel @Inject constructor(
     private val getRecordingsUseCase: GetRecordingsUseCase,
     private val retryUploadUseCase: RetryUploadUseCase,
+    private val deleteRecordingUseCase: DeleteRecordingUseCase,
     private val playbackController: RecordingPlaybackController
 ) : ViewModel() {
 
@@ -37,6 +39,12 @@ class RecordingsViewModel @Inject constructor(
 
     fun retry(filePath: String) {
         retryUploadUseCase(filePath)
+        refresh()
+    }
+
+    fun delete(filePath: String) {
+        if (playingFilePath.value == filePath) playbackController.stop()
+        deleteRecordingUseCase(filePath)
         refresh()
     }
 

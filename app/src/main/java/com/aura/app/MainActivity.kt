@@ -1,9 +1,13 @@
 package com.aura.app
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aura.app.ui.main.MainScreen
+import com.aura.app.ui.permissions.BatteryOptimizationDialog
 import com.aura.app.ui.permissions.PermissionRationaleDialog
 import com.aura.app.ui.recordings.RecordingsScreen
 import com.aura.app.ui.settings.SettingsScreen
@@ -50,10 +55,15 @@ private fun AuraApp() {
     val context = LocalContext.current
     val navController = rememberNavController()
     var showRationale by remember { mutableStateOf(false) }
+    var showBatteryPrompt by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { /* no-op: RECORD_AUDIO denial just means recording fails silently until granted */ }
+
+    val batteryOptimizationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { /* no-op: re-prompted on next cold launch if still not exempted */ }
 
     LaunchedEffect(Unit) {
         if (requiredPermissions().any {
@@ -61,6 +71,10 @@ private fun AuraApp() {
             }
         ) {
             showRationale = true
+        }
+        val powerManager = ContextCompat.getSystemService(context, PowerManager::class.java)
+        if (powerManager != null && !powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
+            showBatteryPrompt = true
         }
     }
 
@@ -71,6 +85,17 @@ private fun AuraApp() {
                 permissionLauncher.launch(requiredPermissions())
             },
             onDismiss = { showRationale = false }
+        )
+    } else if (showBatteryPrompt) {
+        BatteryOptimizationDialog(
+            onContinue = {
+                showBatteryPrompt = false
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                }
+                batteryOptimizationLauncher.launch(intent)
+            },
+            onDismiss = { showBatteryPrompt = false }
         )
     }
 

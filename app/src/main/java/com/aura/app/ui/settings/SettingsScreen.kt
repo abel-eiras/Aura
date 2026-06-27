@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IconButton
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,15 +18,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aura.app.R
+import com.aura.app.domain.model.AudioQuality
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +43,8 @@ fun SettingsScreen(
 ) {
     val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     val queueStatus by viewModel.queueStatus.collectAsStateWithLifecycle()
+    val wifiOnlyUpload by viewModel.wifiOnlyUpload.collectAsStateWithLifecycle()
+    val audioQuality by viewModel.audioQuality.collectAsStateWithLifecycle()
 
     val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -92,6 +101,37 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
+            SettingsSection(stringResource(R.string.settings_uploads_section))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.settings_wifi_only_upload), style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = stringResource(R.string.settings_wifi_only_upload_description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+                Switch(checked = wifiOnlyUpload, onCheckedChange = { viewModel.setWifiOnlyUpload(it) })
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            SettingsSection(stringResource(R.string.settings_audio_quality_section))
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                AudioQuality.entries.forEachIndexed { index, quality ->
+                    SegmentedButton(
+                        selected = audioQuality == quality,
+                        onClick = { viewModel.setAudioQuality(quality) },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = AudioQuality.entries.size)
+                    ) {
+                        Text(stringResource(quality.labelRes()))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
             SettingsSection(stringResource(R.string.settings_about_section))
             Text(
                 text = stringResource(R.string.settings_version, viewModel.versionName),
@@ -108,6 +148,12 @@ private fun SettingsSection(title: String) {
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(bottom = 12.dp)
     )
+}
+
+private fun AudioQuality.labelRes(): Int = when (this) {
+    AudioQuality.LOW -> R.string.settings_audio_quality_low
+    AudioQuality.NORMAL -> R.string.settings_audio_quality_normal
+    AudioQuality.HIGH -> R.string.settings_audio_quality_high
 }
 
 private fun formatBytes(bytes: Long): String {

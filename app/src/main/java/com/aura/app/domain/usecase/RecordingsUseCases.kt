@@ -19,3 +19,9 @@ class RetryUploadUseCase @Inject constructor(
         uploadQueueRepository.enqueueUpload(File(filePath))
     }
 }
+
+class DeleteRecordingUseCase @Inject constructor(
+    private val uploadQueueRepository: UploadQueueRepository
+) {
+    operator fun invoke(filePath: String) = uploadQueueRepository.deleteRecording(filePath)
+}

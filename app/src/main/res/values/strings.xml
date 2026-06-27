@@ -41,6 +41,13 @@
     <string name="settings_upload_queue_section">Upload queue</string>
     <string name="settings_upload_queue_status">%1$d file(s) pending · %2$s</string>
     <string name="settings_upload_queue_empty">No files pending</string>
+    <string name="settings_uploads_section">Uploads</string>
+    <string name="settings_wifi_only_upload">Upload on Wi-Fi only</string>
+    <string name="settings_wifi_only_upload_description">Defer uploads until connected to Wi-Fi, to avoid using mobile data.</string>
+    <string name="settings_audio_quality_section">Audio quality</string>
+    <string name="settings_audio_quality_low">Low</string>
+    <string name="settings_audio_quality_normal">Normal</string>
+    <string name="settings_audio_quality_high">High</string>
     <string name="settings_about_section">About</string>
     <string name="settings_version">Version %1$s</string>
 
@@ -50,12 +57,22 @@
     <string name="permission_rationale_continue">Continue</string>
     <string name="permission_rationale_not_now">Not now</string>
 
+    <!-- Battery optimization prompt -->
+    <string name="battery_optimization_title">Keep recording reliable</string>
+    <string name="battery_optimization_body">Your device\'s battery optimization can stop Aura from recording in the background. Exempt Aura from battery optimization so long recordings aren\'t cut off.</string>
+    <string name="battery_optimization_continue">Open settings</string>
+
     <!-- Recordings screen -->
     <string name="recordings_title">Recordings</string>
     <string name="recordings_empty">No recordings yet</string>
     <string name="recordings_status_pending">Pending upload</string>
     <string name="recordings_status_failed">Upload failed</string>
     <string name="recordings_retry">Retry</string>
+    <string name="recordings_delete">Delete</string>
+    <string name="recordings_delete_cancel">Cancel</string>
+    <string name="recordings_delete_confirm_title">Delete recording?</string>
+    <string name="recordings_delete_confirm_body">This recording will be removed from this device. If it hasn\'t been uploaded yet, it will be lost.</string>
     <string name="content_description_play_recording">Play recording</string>
     <string name="content_description_stop_playback">Stop playback</string>
+    <string name="content_description_delete_recording">Delete recording</string>
 </resources>

@@ -3,6 +3,7 @@ package com.aura.app.recording
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
+import com.aura.app.data.prefs.AppSettings
 import com.aura.app.util.FileNaming
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -16,7 +17,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class AudioRecorderEngine @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val appSettings: AppSettings
 ) {
     private var mediaRecorder: MediaRecorder? = null
     private var outputFile: File? = null
@@ -26,6 +28,7 @@ class AudioRecorderEngine @Inject constructor(
     fun start(outputDir: File): File {
         val extension = if (supportsOpusOgg) "ogg" else "m4a"
         val file = File(outputDir, FileNaming.newRecordingFileName(extension))
+        val quality = appSettings.audioQuality
 
         val recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(context)
@@ -43,8 +46,8 @@ class AudioRecorderEngine @Inject constructor(
                 setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
             }
-            setAudioEncodingBitRate(64_000)
-            setAudioSamplingRate(48_000)
+            setAudioEncodingBitRate(quality.bitRate)
+            setAudioSamplingRate(quality.sampleRate)
             setOutputFile(file.absolutePath)
             prepare()
             start()

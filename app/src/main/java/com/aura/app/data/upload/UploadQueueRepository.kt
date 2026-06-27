@@ -1,11 +1,14 @@
 package com.aura.app.data.upload
 
 import android.content.Context
+import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.aura.app.data.prefs.AppSettings
 import com.aura.app.domain.model.LocalRecording
 import com.aura.app.domain.model.UploadQueueStatus
 import com.aura.app.domain.model.UploadState
@@ -21,7 +24,8 @@ import kotlinx.coroutines.withContext
 @Singleton
 class UploadQueueRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val workManager: WorkManager
+    private val workManager: WorkManager,
+    private val appSettings: AppSettings
 ) {
 
     fun recordingsDir(): File =
@@ -38,6 +42,7 @@ class UploadQueueRepository @Inject constructor(
 
     fun enqueueUpload(file: File, attempt: Int = 0, delayMillis: Long = 0L) {
         val workName = Constants.UPLOAD_WORK_NAME_PREFIX + file.name
+        val networkType = if (appSettings.wifiOnlyUpload) NetworkType.UNMETERED else NetworkType.CONNECTED
         val request = OneTimeWorkRequestBuilder<UploadWorker>()
             .setInputData(
                 Data.Builder()
@@ -45,9 +50,17 @@ class UploadQueueRepository @Inject constructor(
                     .putInt(UploadWorker.KEY_ATTEMPT, attempt)
                     .build()
             )
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(networkType).build())
             .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
             .build()
         workManager.enqueueUniqueWork(workName, ExistingWorkPolicy.REPLACE, request)
+    }
+
+    /** Removes a recording from local storage and cancels any pending upload for it. */
+    fun deleteRecording(filePath: String) {
+        val file = File(filePath)
+        workManager.cancelUniqueWork(Constants.UPLOAD_WORK_NAME_PREFIX + file.name)
+        file.delete()
     }
 
     /** Called on app start / sign-in to retry anything left over from a previous session. */
