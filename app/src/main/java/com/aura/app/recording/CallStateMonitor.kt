@@ -56,7 +56,7 @@ class CallStateMonitor @Inject constructor(
         modernCallback = null
         legacyListener?.let {
             @Suppress("DEPRECATION")
-            telephonyManager?.listen(it, PhoneStateListener.LISTEN_CALL_STATE_NONE)
+            telephonyManager?.listen(it, PhoneStateListener.LISTEN_NONE)
         }
         legacyListener = null
     }

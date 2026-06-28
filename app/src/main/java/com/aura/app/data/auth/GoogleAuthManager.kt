@@ -6,6 +6,7 @@ import android.util.Log
 import com.aura.app.data.prefs.SecurePrefs
 import com.aura.app.util.Constants
 import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -17,6 +18,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
 /**
@@ -42,6 +45,12 @@ class GoogleAuthManager @Inject constructor(
     var lastSignInErrorMessage: String? = null
         private set
 
+    private val _needsReauth = MutableStateFlow(false)
+    val needsReauth: StateFlow<Boolean> = _needsReauth
+
+    @Volatile
+    private var pendingRecoveryIntent: Intent? = null
+
     fun signInIntent(): Intent = client.signInIntent
 
     fun lastSignedInAccount(): GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(context)
@@ -52,6 +61,8 @@ class GoogleAuthManager @Inject constructor(
             task.getResult(ApiException::class.java).also { account ->
                 lastSignInErrorMessage = null
                 securePrefs.accountEmail = account.email
+                _needsReauth.value = false
+                pendingRecoveryIntent = null
             }
         } catch (e: ApiException) {
             val reason = GoogleSignInStatusCodes.getStatusCodeString(e.statusCode)
@@ -65,16 +76,31 @@ class GoogleAuthManager @Inject constructor(
         runCatching { client.revokeAccess() }
         runCatching { client.signOut() }
         securePrefs.clear()
+        _needsReauth.value = false
+        pendingRecoveryIntent = null
     }
+
+    /**
+     * Returns the recovery [Intent] saved from the last [UserRecoverableAuthException], if any,
+     * and clears it. Launching this intent lets the user re-grant consent without a full sign-out.
+     */
+    fun consumeRecoveryIntent(): Intent? = pendingRecoveryIntent.also { pendingRecoveryIntent = null }
 
     /** Blocking Play Services call; must run off the main thread. */
     suspend fun fetchFreshAccessToken(): String? = withContext(Dispatchers.IO) {
         val account = lastSignedInAccount() ?: return@withContext null
-        runCatching {
-            GoogleAuthUtil.getToken(context, account.account!!, "oauth2:${Constants.DRIVE_SCOPE}")
-        }.onSuccess { token ->
+        try {
+            val token = GoogleAuthUtil.getToken(context, account.account!!, "oauth2:${Constants.DRIVE_SCOPE}")
             securePrefs.cachedAccessToken = token
-        }.getOrNull()
+            _needsReauth.value = false
+            token
+        } catch (e: UserRecoverableAuthException) {
+            pendingRecoveryIntent = e.intent
+            _needsReauth.value = true
+            null
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun invalidateToken(token: String) {

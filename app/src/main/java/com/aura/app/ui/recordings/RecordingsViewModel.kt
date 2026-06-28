@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.aura.app.domain.model.LocalRecording
 import com.aura.app.domain.usecase.DeleteRecordingUseCase
 import com.aura.app.domain.usecase.GetRecordingsUseCase
+import com.aura.app.domain.usecase.RemoveUploadHistoryEntryUseCase
+import com.aura.app.domain.usecase.RetryPendingUploadsUseCase
 import com.aura.app.domain.usecase.RetryUploadUseCase
 import com.aura.app.recording.RecordingPlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +20,9 @@ import kotlinx.coroutines.launch
 class RecordingsViewModel @Inject constructor(
     private val getRecordingsUseCase: GetRecordingsUseCase,
     private val retryUploadUseCase: RetryUploadUseCase,
+    private val retryPendingUploadsUseCase: RetryPendingUploadsUseCase,
     private val deleteRecordingUseCase: DeleteRecordingUseCase,
+    private val removeUploadHistoryEntryUseCase: RemoveUploadHistoryEntryUseCase,
     private val playbackController: RecordingPlaybackController
 ) : ViewModel() {
 
@@ -42,9 +46,19 @@ class RecordingsViewModel @Inject constructor(
         refresh()
     }
 
-    fun delete(filePath: String) {
-        if (playingFilePath.value == filePath) playbackController.stop()
-        deleteRecordingUseCase(filePath)
+    fun retryAll() {
+        retryPendingUploadsUseCase()
+        refresh()
+    }
+
+    fun delete(recording: LocalRecording) {
+        val filePath = recording.filePath
+        if (filePath != null) {
+            if (playingFilePath.value == filePath) playbackController.stop()
+            deleteRecordingUseCase(filePath)
+        } else {
+            removeUploadHistoryEntryUseCase(recording.fileName)
+        }
         refresh()
     }
 

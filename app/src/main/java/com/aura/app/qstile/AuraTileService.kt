@@ -1,23 +1,23 @@
 package com.aura.app.qstile
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import android.graphics.drawable.Icon
 import com.aura.app.R
 import com.aura.app.domain.model.RecordingStatus
 import com.aura.app.recording.RecordingService
 import com.aura.app.recording.RecordingStateHolder
+import com.aura.app.util.IconRotation
+import com.aura.app.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +38,10 @@ class AuraTileService : TileService() {
     private var collectJob: Job? = null
     private var rotationJob: Job? = null
     private var rotationAngle = 0f
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(base))
+    }
 
     override fun onStartListening() {
         super.onStartListening()
@@ -121,21 +125,11 @@ class AuraTileService : TileService() {
         }
     }
 
-    private fun rotatedIconBitmap(angleDegrees: Float): Bitmap {
-        val size = 96
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val drawable: Drawable = ContextCompat.getDrawable(this, R.drawable.ic_aura_mono)!!.mutate()
-        DrawableCompat.setTint(drawable, Color.parseColor("#6E5BFF"))
-        drawable.setBounds(0, 0, size, size)
-        canvas.save()
-        canvas.rotate(angleDegrees, size / 2f, size / 2f)
-        drawable.draw(canvas)
-        canvas.restore()
-        return bitmap
-    }
+    private fun rotatedIconBitmap(angleDegrees: Float): Bitmap =
+        IconRotation.rotatedBitmap(this, R.drawable.ic_aura_mono, angleDegrees, ICON_SIZE_PX, Color.parseColor("#6E5BFF"))
 
     private companion object {
+        const val ICON_SIZE_PX = 96
         const val TAG = "AuraTileService"
     }
 }

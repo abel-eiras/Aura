@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.aura.app.data.auth.GoogleAuthManager
 import com.aura.app.data.prefs.AppSettings
 import com.aura.app.domain.model.AccountState
+import com.aura.app.domain.model.AppLanguage
 import com.aura.app.domain.model.AudioQuality
 import com.aura.app.domain.model.UploadQueueStatus
 import com.aura.app.domain.usecase.GetAccountStateUseCase
@@ -18,6 +19,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -46,6 +49,17 @@ class SettingsViewModel @Inject constructor(
     private val _signInError = MutableStateFlow<String?>(null)
     val signInError: StateFlow<String?> = _signInError
 
+    private val _language = MutableStateFlow(AppLanguage.fromTag(appSettings.languageTag))
+    val language: StateFlow<AppLanguage> = _language
+
+    init {
+        authManager.needsReauth.onEach { needsReauth ->
+            if (_accountState.value.needsReauth != needsReauth) {
+                _accountState.value = _accountState.value.copy(needsReauth = needsReauth)
+            }
+        }.launchIn(viewModelScope)
+    }
+
     val versionName: String = runCatching {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName
     }.getOrNull() ?: "1.0.0"
@@ -58,6 +72,11 @@ class SettingsViewModel @Inject constructor(
     fun setAudioQuality(quality: AudioQuality) {
         appSettings.audioQuality = quality
         _audioQuality.value = quality
+    }
+
+    fun setLanguage(language: AppLanguage) {
+        appSettings.languageTag = language.tag
+        _language.value = language
     }
 
     fun signInIntent(): Intent = authManager.signInIntent()
@@ -82,6 +101,14 @@ class SettingsViewModel @Inject constructor(
             signOutUseCase()
             refresh()
         }
+    }
+
+    /** Intent to re-grant Drive consent without a full sign-out, or null if none is pending. */
+    fun reauthIntent(): Intent? = authManager.consumeRecoveryIntent()
+
+    fun onReauthResult() {
+        refresh()
+        retryPendingUploadsUseCase()
     }
 
     fun refresh() {

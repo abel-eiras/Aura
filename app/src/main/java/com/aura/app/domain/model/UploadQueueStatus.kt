@@ -6,7 +6,10 @@ data class UploadQueueStatus(
 )
 
 data class AccountState(
-    val email: String?
+    val email: String?,
+    /** True when Drive access needs a fresh consent (token revoked/expired) - signed in, but
+     * uploads will keep failing until the user reconnects. */
+    val needsReauth: Boolean = false
 ) {
     val isSignedIn: Boolean get() = email != null
 }

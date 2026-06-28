@@ -21,4 +21,12 @@ object Constants {
 
     /** Above this, oldest pending recordings are deleted so local storage can't grow unbounded. */
     const val MAX_PENDING_STORAGE_BYTES = 500L * 1024 * 1024
+
+    /** Caps the persisted "uploaded" history so it can't grow unbounded either. */
+    const val MAX_UPLOAD_HISTORY_ENTRIES = 200
+
+    const val GITHUB_API_BASE_URL = "https://api.github.com/"
+    const val GITHUB_OWNER = "abel-eiras"
+    const val GITHUB_REPO = "Aura"
+    const val GITHUB_RELEASES_PAGE_URL = "https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/latest"
 }

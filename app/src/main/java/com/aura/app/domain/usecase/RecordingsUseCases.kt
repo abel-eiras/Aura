@@ -25,3 +25,10 @@ class DeleteRecordingUseCase @Inject constructor(
 ) {
     operator fun invoke(filePath: String) = uploadQueueRepository.deleteRecording(filePath)
 }
+
+/** Removes an already-uploaded recording from the local history list (Drive is untouched). */
+class RemoveUploadHistoryEntryUseCase @Inject constructor(
+    private val uploadQueueRepository: UploadQueueRepository
+) {
+    operator fun invoke(fileName: String) = uploadQueueRepository.removeHistoryEntry(fileName)
+}

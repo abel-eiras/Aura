@@ -3,6 +3,8 @@ package com.aura.app.di
 import android.content.Context
 import androidx.work.WorkManager
 import com.aura.app.data.drive.DriveApi
+import com.aura.app.data.update.GitHubApi
+import com.aura.app.util.Constants
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -42,6 +44,15 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDriveApi(retrofit: Retrofit): DriveApi = retrofit.create(DriveApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGitHubApi(okHttpClient: OkHttpClient, gson: Gson): GitHubApi = Retrofit.Builder()
+        .baseUrl(Constants.GITHUB_API_BASE_URL)
+        .client(okHttpClient)
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+        .create(GitHubApi::class.java)
 
     @Provides
     @Singleton

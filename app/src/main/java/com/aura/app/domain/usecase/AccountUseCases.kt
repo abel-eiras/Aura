@@ -7,9 +7,13 @@ import com.aura.app.domain.model.AccountState
 import javax.inject.Inject
 
 class GetAccountStateUseCase @Inject constructor(
-    private val securePrefs: SecurePrefs
+    private val securePrefs: SecurePrefs,
+    private val authManager: GoogleAuthManager
 ) {
-    operator fun invoke(): AccountState = AccountState(email = securePrefs.accountEmail)
+    operator fun invoke(): AccountState = AccountState(
+        email = securePrefs.accountEmail,
+        needsReauth = authManager.needsReauth.value
+    )
 }
 
 class SignOutUseCase @Inject constructor(

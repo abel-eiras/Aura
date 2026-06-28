@@ -86,6 +86,7 @@ class DriveRepository @Inject constructor(
     }
 
     private fun mimeTypeFor(extension: String): String = when (extension.lowercase()) {
+        "wav" -> "audio/wav"
         "ogg" -> "audio/ogg"
         "m4a" -> "audio/mp4"
         else -> "application/octet-stream"

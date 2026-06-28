@@ -8,7 +8,7 @@ object FileNaming {
 
     private fun timestampFormatter() = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 
-    /** e.g. aura_20250626_143022.ogg (or .m4a on API < 29, see AudioRecorderEngine). */
+    /** e.g. aura_20250626_143022.wav */
     fun newRecordingFileName(extension: String): String {
         val timestamp = timestampFormatter().format(Date())
         return "aura_$timestamp.$extension"

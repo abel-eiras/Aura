@@ -25,7 +25,8 @@ import kotlinx.coroutines.withContext
 class UploadQueueRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val workManager: WorkManager,
-    private val appSettings: AppSettings
+    private val appSettings: AppSettings,
+    private val uploadHistoryStore: UploadHistoryStore
 ) {
 
     fun recordingsDir(): File =
@@ -81,9 +82,9 @@ class UploadQueueRepository @Inject constructor(
         }
     }
 
-    /** Local recordings not yet successfully uploaded, newest first. */
+    /** Local pending/failed recordings plus the persisted history of uploaded ones, newest first. */
     suspend fun listRecordings(): List<LocalRecording> = withContext(Dispatchers.IO) {
-        recordingsDir().listFiles().orEmpty()
+        val pending = recordingsDir().listFiles().orEmpty()
             .map { file ->
                 LocalRecording(
                     fileName = file.name,
@@ -93,7 +94,21 @@ class UploadQueueRepository @Inject constructor(
                     uploadState = uploadStateFor(file.name)
                 )
             }
-            .sortedByDescending { it.createdAtMillis }
+        val uploaded = uploadHistoryStore.all().map { entry ->
+            LocalRecording(
+                fileName = entry.fileName,
+                filePath = null,
+                sizeBytes = entry.sizeBytes,
+                createdAtMillis = entry.uploadedAtMillis,
+                uploadState = UploadState.UPLOADED
+            )
+        }
+        (pending + uploaded).sortedByDescending { it.createdAtMillis }
+    }
+
+    /** Removes an [UploadState.UPLOADED] entry from local history; the file in Drive is untouched. */
+    fun removeHistoryEntry(fileName: String) {
+        uploadHistoryStore.remove(fileName)
     }
 
     private fun uploadStateFor(fileName: String): UploadState {

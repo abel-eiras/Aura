@@ -22,7 +22,8 @@ class UploadWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
     private val driveRepository: DriveRepository,
-    private val uploadQueueRepository: UploadQueueRepository
+    private val uploadQueueRepository: UploadQueueRepository,
+    private val uploadHistoryStore: UploadHistoryStore
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
@@ -43,6 +44,13 @@ class UploadWorker @AssistedInject constructor(
 
         val uploaded = driveRepository.uploadRecording(file)
         if (uploaded) {
+            uploadHistoryStore.add(
+                UploadHistoryEntry(
+                    fileName = file.name,
+                    sizeBytes = file.length(),
+                    uploadedAtMillis = System.currentTimeMillis()
+                )
+            )
             file.delete()
             return Result.success()
         }

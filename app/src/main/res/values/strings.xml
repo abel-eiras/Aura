@@ -13,6 +13,9 @@
     <string name="tile_permission_missing">Open Aura once to grant the microphone permission</string>
     <string name="tile_action_failed">Couldn\'t start recording, open Aura to check permissions</string>
 
+    <!-- Home screen widget -->
+    <string name="widget_description">Tap to start or stop recording</string>
+
     <!-- Foreground service notification -->
     <string name="notification_title">Aura</string>
     <string name="notification_text_recording">Recording audio</string>
@@ -33,6 +36,8 @@
     <string name="content_description_logo">Aura logo</string>
     <string name="content_description_pause">Pause recording</string>
     <string name="content_description_resume">Resume recording</string>
+    <string name="update_available">Version %1$s is available. Tap to download.</string>
+    <string name="update_dismiss">Dismiss</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Settings</string>
@@ -41,6 +46,8 @@
     <string name="settings_disconnect">Disconnect</string>
     <string name="settings_connected_as">Connected as %1$s</string>
     <string name="settings_sign_in_error">Couldn\'t connect: %1$s</string>
+    <string name="settings_needs_reauth">Drive access expired. Reconnect to keep uploading.</string>
+    <string name="settings_reconnect">Reconnect</string>
     <string name="settings_upload_queue_section">Upload queue</string>
     <string name="settings_upload_queue_status">%1$d file(s) pending · %2$s</string>
     <string name="settings_upload_queue_empty">No files pending</string>
@@ -51,6 +58,7 @@
     <string name="settings_audio_quality_low">Low</string>
     <string name="settings_audio_quality_normal">Normal</string>
     <string name="settings_audio_quality_high">High</string>
+    <string name="settings_language_section">Language</string>
     <string name="settings_about_section">About</string>
     <string name="settings_version">Version %1$s</string>
 
@@ -59,6 +67,11 @@
     <string name="permission_rationale_body">Aura records audio to the files it creates. It needs microphone access to record, notification access so you can see when recording is active, and phone state access so it can auto-pause while you\'re on a call.</string>
     <string name="permission_rationale_continue">Continue</string>
     <string name="permission_rationale_not_now">Not now</string>
+
+    <!-- Permanently denied permission -->
+    <string name="permission_denied_title">Microphone permission blocked</string>
+    <string name="permission_denied_body">Aura can\'t record without microphone access, and it can no longer ask directly. Enable it from this app\'s system settings.</string>
+    <string name="permission_denied_open_settings">Open settings</string>
 
     <!-- Battery optimization prompt -->
     <string name="battery_optimization_title">Keep recording reliable</string>
@@ -69,13 +82,17 @@
     <string name="recordings_title">Recordings</string>
     <string name="recordings_empty">No recordings yet</string>
     <string name="recordings_status_pending">Pending upload</string>
+    <string name="recordings_status_uploaded">Uploaded</string>
     <string name="recordings_status_failed">Upload failed</string>
     <string name="recordings_retry">Retry</string>
+    <string name="recordings_retry_all">Retry all</string>
     <string name="recordings_delete">Delete</string>
     <string name="recordings_delete_cancel">Cancel</string>
     <string name="recordings_delete_confirm_title">Delete recording?</string>
     <string name="recordings_delete_confirm_body">This recording will be removed from this device. If it hasn\'t been uploaded yet, it will be lost.</string>
+    <string name="recordings_delete_confirm_body_uploaded">This only removes it from this history list. The file already uploaded stays in your Drive.</string>
     <string name="content_description_play_recording">Play recording</string>
     <string name="content_description_stop_playback">Stop playback</string>
     <string name="content_description_delete_recording">Delete recording</string>
+    <string name="content_description_uploaded">Uploaded to Drive</string>
 </resources>

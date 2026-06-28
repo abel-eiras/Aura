@@ -1,10 +1,10 @@
 package com.aura.app.ui.settings
 
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IconButton
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -25,13 +26,16 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aura.app.R
+import com.aura.app.domain.model.AppLanguage
 import com.aura.app.domain.model.AudioQuality
 import java.util.Locale
 
@@ -41,16 +45,22 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     val queueStatus by viewModel.queueStatus.collectAsStateWithLifecycle()
     val wifiOnlyUpload by viewModel.wifiOnlyUpload.collectAsStateWithLifecycle()
     val audioQuality by viewModel.audioQuality.collectAsStateWithLifecycle()
     val signInError by viewModel.signInError.collectAsStateWithLifecycle()
+    val language by viewModel.language.collectAsStateWithLifecycle()
 
     val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             viewModel.onSignInResult(result.data)
         }
+    }
+
+    val reauthLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        viewModel.onReauthResult()
     }
 
     Scaffold(
@@ -73,6 +83,28 @@ fun SettingsScreen(
                     text = stringResource(R.string.settings_connected_as, accountState.email.orEmpty()),
                     style = MaterialTheme.typography.bodyMedium
                 )
+                if (accountState.needsReauth) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.settings_needs_reauth),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            val intent = viewModel.reauthIntent()
+                            if (intent != null) {
+                                reauthLauncher.launch(intent)
+                            } else {
+                                signInLauncher.launch(viewModel.signInIntent())
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.settings_reconnect))
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedButton(onClick = { viewModel.signOut() }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.settings_disconnect))
@@ -136,6 +168,23 @@ fun SettingsScreen(
                         shape = SegmentedButtonDefaults.itemShape(index = index, count = AudioQuality.entries.size)
                     ) {
                         Text(stringResource(quality.labelRes()))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            SettingsSection(stringResource(R.string.settings_language_section))
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                AppLanguage.entries.forEachIndexed { index, lang ->
+                    SegmentedButton(
+                        selected = language == lang,
+                        onClick = {
+                            viewModel.setLanguage(lang)
+                            (context as? Activity)?.recreate()
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = AppLanguage.entries.size)
+                    ) {
+                        Text(lang.displayName)
                     }
                 }
             }

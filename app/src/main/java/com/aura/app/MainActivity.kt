@@ -1,6 +1,8 @@
 package com.aura.app
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -23,22 +25,33 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.aura.app.data.prefs.AppSettings
 import com.aura.app.ui.main.MainScreen
 import com.aura.app.ui.permissions.BatteryOptimizationDialog
+import com.aura.app.ui.permissions.PermissionDeniedDialog
 import com.aura.app.ui.permissions.PermissionRationaleDialog
 import com.aura.app.ui.recordings.RecordingsScreen
 import com.aura.app.ui.settings.SettingsScreen
 import com.aura.app.ui.theme.AuraTheme
+import com.aura.app.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var appSettings: AppSettings
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AuraTheme {
-                AuraApp()
+                AuraApp(appSettings)
             }
         }
     }
@@ -51,15 +64,26 @@ private object Routes {
 }
 
 @Composable
-private fun AuraApp() {
+private fun AuraApp(appSettings: AppSettings) {
     val context = LocalContext.current
     val navController = rememberNavController()
     var showRationale by remember { mutableStateOf(false) }
     var showBatteryPrompt by remember { mutableStateOf(false) }
+    var showPermanentlyDenied by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* no-op: RECORD_AUDIO denial just means recording fails silently until granted */ }
+    ) { results ->
+        val wasFirstRequest = !appSettings.hasRequestedRecordAudioBefore
+        appSettings.hasRequestedRecordAudioBefore = true
+
+        val recordAudioDenied = results[Manifest.permission.RECORD_AUDIO] == false
+        val canShowRationale = (context as? Activity)
+            ?.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ?: true
+        if (!wasFirstRequest && recordAudioDenied && !canShowRationale) {
+            showPermanentlyDenied = true
+        }
+    }
 
     val batteryOptimizationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -70,7 +94,16 @@ private fun AuraApp() {
                 ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
             }
         ) {
-            showRationale = true
+            val recordAudioGranted = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+            val canShowRationale = (context as? Activity)
+                ?.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) ?: true
+            if (!recordAudioGranted && appSettings.hasRequestedRecordAudioBefore && !canShowRationale) {
+                showPermanentlyDenied = true
+            } else {
+                showRationale = true
+            }
         }
         val powerManager = ContextCompat.getSystemService(context, PowerManager::class.java)
         if (powerManager != null && !powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
@@ -85,6 +118,17 @@ private fun AuraApp() {
                 permissionLauncher.launch(requiredPermissions())
             },
             onDismiss = { showRationale = false }
+        )
+    } else if (showPermanentlyDenied) {
+        PermissionDeniedDialog(
+            onOpenSettings = {
+                showPermanentlyDenied = false
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                }
+                context.startActivity(intent)
+            },
+            onDismiss = { showPermanentlyDenied = false }
         )
     } else if (showBatteryPrompt) {
         BatteryOptimizationDialog(
