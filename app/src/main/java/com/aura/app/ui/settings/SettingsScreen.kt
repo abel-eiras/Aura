@@ -45,6 +45,7 @@ fun SettingsScreen(
     val queueStatus by viewModel.queueStatus.collectAsStateWithLifecycle()
     val wifiOnlyUpload by viewModel.wifiOnlyUpload.collectAsStateWithLifecycle()
     val audioQuality by viewModel.audioQuality.collectAsStateWithLifecycle()
+    val signInError by viewModel.signInError.collectAsStateWithLifecycle()
 
     val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -82,6 +83,14 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.settings_connect_google))
+                }
+                signInError?.let { error ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.settings_sign_in_error, error),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
 

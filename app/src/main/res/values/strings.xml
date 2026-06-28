@@ -10,6 +10,8 @@
     <string name="tile_subtitle_idle">Tap to record</string>
     <string name="tile_subtitle_recording">Tap to stop</string>
     <string name="tile_subtitle_paused">Tap to stop</string>
+    <string name="tile_permission_missing">Open Aura once to grant the microphone permission</string>
+    <string name="tile_action_failed">Couldn\'t start recording, open Aura to check permissions</string>
 
     <!-- Foreground service notification -->
     <string name="notification_title">Aura</string>
@@ -38,6 +40,7 @@
     <string name="settings_connect_google">Connect Google Account</string>
     <string name="settings_disconnect">Disconnect</string>
     <string name="settings_connected_as">Connected as %1$s</string>
+    <string name="settings_sign_in_error">Couldn\'t connect: %1$s</string>
     <string name="settings_upload_queue_section">Upload queue</string>
     <string name="settings_upload_queue_status">%1$d file(s) pending · %2$s</string>
     <string name="settings_upload_queue_empty">No files pending</string>

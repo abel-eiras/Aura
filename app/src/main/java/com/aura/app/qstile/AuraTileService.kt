@@ -1,5 +1,7 @@
 package com.aura.app.qstile
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,6 +9,8 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import android.graphics.drawable.Icon
@@ -52,9 +56,22 @@ class AuraTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        when (recordingStateHolder.status.value) {
-            is RecordingStatus.Idle -> RecordingService.start(applicationContext)
-            is RecordingStatus.Recording, is RecordingStatus.Paused -> RecordingService.stop(applicationContext)
+        val status = recordingStateHolder.status.value
+        if (status is RecordingStatus.Idle &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(this, getString(R.string.tile_permission_missing), Toast.LENGTH_LONG).show()
+            return
+        }
+        try {
+            when (status) {
+                is RecordingStatus.Idle -> RecordingService.start(applicationContext)
+                is RecordingStatus.Recording, is RecordingStatus.Paused -> RecordingService.stop(applicationContext)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to toggle recording from QS tile", e)
+            Toast.makeText(this, getString(R.string.tile_action_failed), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -116,5 +133,9 @@ class AuraTileService : TileService() {
         drawable.draw(canvas)
         canvas.restore()
         return bitmap
+    }
+
+    private companion object {
+        const val TAG = "AuraTileService"
     }
 }

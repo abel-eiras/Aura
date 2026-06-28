@@ -43,6 +43,9 @@ class SettingsViewModel @Inject constructor(
     private val _audioQuality = MutableStateFlow(appSettings.audioQuality)
     val audioQuality: StateFlow<AudioQuality> = _audioQuality
 
+    private val _signInError = MutableStateFlow<String?>(null)
+    val signInError: StateFlow<String?> = _signInError
+
     val versionName: String = runCatching {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName
     }.getOrNull() ?: "1.0.0"
@@ -62,9 +65,16 @@ class SettingsViewModel @Inject constructor(
     fun onSignInResult(data: Intent?) {
         val account = authManager.handleSignInResult(data)
         if (account != null) {
+            _signInError.value = null
             refresh()
             retryPendingUploadsUseCase()
+        } else {
+            _signInError.value = authManager.lastSignInErrorMessage
         }
+    }
+
+    fun dismissSignInError() {
+        _signInError.value = null
     }
 
     fun signOut() {

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.aura.app.R
@@ -37,11 +38,18 @@ class RecordingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_START -> startRecording()
-            ACTION_PAUSE -> pauseRecording()
-            ACTION_RESUME -> resumeRecording()
-            ACTION_STOP -> stopRecording()
+        try {
+            when (intent?.action) {
+                ACTION_START -> startRecording()
+                ACTION_PAUSE -> pauseRecording()
+                ACTION_RESUME -> resumeRecording()
+                ACTION_STOP -> stopRecording()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to handle action ${intent?.action}", e)
+            recordingStateHolder.setIdle()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
         }
         return START_NOT_STICKY
     }
@@ -192,5 +200,7 @@ class RecordingService : Service() {
             val intent = Intent(context, RecordingService::class.java).setAction(ACTION_STOP)
             ContextCompat.startForegroundService(context, intent)
         }
+
+        private const val TAG = "RecordingService"
     }
 }

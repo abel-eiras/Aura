@@ -2,6 +2,7 @@ package com.aura.app.data.auth
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.aura.app.data.prefs.SecurePrefs
 import com.aura.app.util.Constants
 import com.google.android.gms.auth.GoogleAuthUtil
@@ -9,6 +10,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -35,14 +38,26 @@ class GoogleAuthManager @Inject constructor(
 
     val client: GoogleSignInClient by lazy { GoogleSignIn.getClient(context, signInOptions) }
 
+    /** Set by [handleSignInResult] when sign-in fails, so the caller can surface a reason. */
+    var lastSignInErrorMessage: String? = null
+        private set
+
     fun signInIntent(): Intent = client.signInIntent
 
     fun lastSignedInAccount(): GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(context)
 
     fun handleSignInResult(data: Intent?): GoogleSignInAccount? {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        return runCatching { task.getResult() }.getOrNull()?.also { account ->
-            securePrefs.accountEmail = account.email
+        return try {
+            task.getResult(ApiException::class.java).also { account ->
+                lastSignInErrorMessage = null
+                securePrefs.accountEmail = account.email
+            }
+        } catch (e: ApiException) {
+            val reason = GoogleSignInStatusCodes.getStatusCodeString(e.statusCode)
+            Log.w(TAG, "Google sign-in failed: code=${e.statusCode} ($reason)", e)
+            lastSignInErrorMessage = "$reason (${e.statusCode})"
+            null
         }
     }
 
@@ -64,5 +79,9 @@ class GoogleAuthManager @Inject constructor(
 
     fun invalidateToken(token: String) {
         runCatching { GoogleAuthUtil.clearToken(context, token) }
+    }
+
+    private companion object {
+        const val TAG = "GoogleAuthManager"
     }
 }
