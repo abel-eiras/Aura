@@ -1,5 +1,26 @@
 # Aura
 
+## El porqué de este trasto
+
+La chispa fue ver uno de esos gadgets que se enganchan al móvil para
+grabarte las reuniones: 100-200 € más suscripción mensual (que de algo hay
+que vivir, oye) por un micrófono que ya llevas dentro del teléfono desde
+hace más de una década. Ni que grabar audio fuera tecnología de la NASA.
+
+Así que hice lo de siempre: montármelo por mi cuenta. Aura graba y sube el
+audio a tu propio Google Drive —sin cuota mensual, sin depender de que a
+nadie se le ocurra subir el precio el año que viene— y
+[aura-transcribe](https://github.com/abel-eiras/aura-transcribe) se encarga
+de transcribirlo, separar quién habla y redactar la nota, todo en tu propio
+ordenador.
+
+Y sí, sale bastante más privado que el cacharro de turno... aunque tampoco
+nos pongamos medallas: el audio acaba en Drive, y si activas las notas, el
+texto pasa por un modelo que no está en tu máquina (vía OpenRouter). Podría
+ser 100 % local con Ollama, que ganas no faltan, pero entre mi GPU y yo hay
+una relación sincera: a mí me gustaría, a ella no le cabe en la VRAM. El día
+que eso cambie, esa parte también se vuelve local.
+
 Aura es una app nativa de Android que graba notas de voz y las sube
 automáticamente a una carpeta llamada **"Aura"** en tu propio Google Drive.
 Sin nada oculto: la notificación mientras grabas, el icono en Ajustes rápidos
@@ -181,3 +202,7 @@ release. Consíguela con:
 ```
 keytool -list -v -keystore /ruta/a/tu-release.keystore -alias tu-alias
 ```
+
+## Licencia
+
+[MIT](LICENSE).
